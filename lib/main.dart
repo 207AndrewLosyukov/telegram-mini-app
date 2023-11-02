@@ -10,35 +10,43 @@ void main() {
   runApp(const TelegramMiniApp());
 }
 
+
 Future<String> retrieveUserId() async {
   final completer = Completer<String>();
 
-  js.context.callMethod('eval', [
-    '''
-    fetch('https://telegram.org/js/telegram-web-app.js')
-      .then(response => response.text())
-      .then(scriptText => {
-        const script = document.createElement('script');
-        script.textContent = scriptText;
-        document.head.appendChild(script);
+  // Define a callback for when the event is fired
+  void onTelegramUserId(js.JsObject event) {
+    final userId = event['detail'].toString();
+    completer.complete(userId);
+  }
 
-        script.onload = () => {
+  // Register the callback using dart:js interop
+  js.context['onTelegramUserId'] = onTelegramUserId;
+
+  // Inject and execute JavaScript code
+  js.context.callMethod('eval', ['''
+    (function() {
+      var script = document.createElement('script');
+      script.src = 'https://telegram.org/js/telegram-web-app.js';
+      document.head.appendChild(script);
+
+      script.onload = function() {
+        try {
           Telegram.WebApp.ready();
-          const userId = Telegram.WebApp.initData.user.id;
+          var userId = Telegram.WebApp.initData.user.id.toString();
           window.dispatchEvent(new CustomEvent('telegramUserId', { detail: userId }));
-        };
-      })
-      .catch(error => console.error('Error loading Telegram script:', error));
-  '''
-  ]);
+        } catch (e) {
+          console.error('Error retrieving user ID:', e);
+        }
+      };
 
-  // Listen for the custom event to receive the user ID
-  js.context['window'].callMethod('addEventListener', [
-    'telegramUserId',
-    js.allowInterop((js.JsObject event) {
-      completer.complete(event['detail'].toString());
-    }),
-  ]);
+      script.onerror = function() {
+        console.error('Error loading Telegram script.');
+      };
+
+      window.addEventListener('telegramUserId', onTelegramUserId);
+    })();
+  ''']);
 
   return completer.future;
 }
@@ -56,14 +64,9 @@ class TelegramMiniApp extends StatelessWidget {
       home: Scaffold(
         body: FutureBuilder(
           future: retrieveUserId(),
-          initialData: Container(
-            color: Colors.red,
-            height: 100,
-            width: 100,
-          ),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
-              return Text(snapshot.data);
+              return Text("data - " + snapshot.data);
             } else {
               return Text("error - ${snapshot.error}\ndata - ${snapshot.data}");
             }

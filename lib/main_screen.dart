@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hibye_mini_app/main.dart';
 import 'package:hibye_mini_app/meet_item.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({
-    super.key,
-    //  required this.circle
-  });
-  // final Future<CircleModel> circle;
+  const MainScreen({super.key, required this.circle});
+  final Future<CircleModel> circle;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -50,29 +46,36 @@ class _MainScreenState extends State<MainScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 30.0),
                     child: FutureBuilder(
-                      // future: widget.circle,
-                      future: retrieveUserId(),
+                      future: widget.circle,
                       builder: (BuildContext context,
                           AsyncSnapshot<dynamic> snapshot) {
-                        print(snapshot);
                         if (snapshot.hasData) {
-                          return Container(
-                            width: 40.0,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                              color: Color(snapshot.data.color),
-                            ),
-                            child: Center(
-                              child: Text(
-                                snapshot.data.text,
-                                style: const TextStyle(
-                                  fontSize: 4,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          );
+                          return snapshot.data.image == null
+                              ? Container(
+                                  width: 40.0,
+                                  height: 40.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    color: Color(snapshot.data.color),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      snapshot.data.text,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  child: Image.network(
+                                    snapshot.data.image!,
+                                    width: 40.0,
+                                    height: 40.0,
+                                  ),
+                                );
                         } else {
                           return Container(
                             width: 40.0,
@@ -81,11 +84,11 @@ class _MainScreenState extends State<MainScreen> {
                               borderRadius: BorderRadius.circular(20.0),
                               color: const Color(0xFFFFF3FF),
                             ),
-                            child: Center(
+                            child: const Center(
                               child: Text(
-                                snapshot.error.toString(),
+                                "",
                                 style: TextStyle(
-                                  fontSize: 4,
+                                  fontSize: 14,
                                   color: Colors.black,
                                 ),
                               ),

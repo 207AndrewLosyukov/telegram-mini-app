@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hibye_mini_app/main.dart';
 import 'package:hibye_mini_app/meet_item.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key, required this.image});
-  final String? image;
+  const MainScreen({
+    super.key,
+    //  required this.circle
+  });
+  // final Future<CircleModel> circle;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -29,8 +33,8 @@ class _MainScreenState extends State<MainScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    height: 40,
-                    width: MediaQuery.of(context).size.width - 160,
+                    height: 50,
+                    width: MediaQuery.of(context).size.width - 110,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(
                         10.0,
@@ -45,23 +49,51 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 30.0),
-                    child: widget.image == null
-                        ? Container(
-                            width: 40,
-                            height: 40,
+                    child: FutureBuilder(
+                      // future: widget.circle,
+                      future: retrieveUserId(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<dynamic> snapshot) {
+                        print(snapshot);
+                        if (snapshot.hasData) {
+                          return Container(
+                            width: 40.0,
+                            height: 40.0,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(20.0),
+                              color: Color(snapshot.data.color),
                             ),
-                          )
-                        : Padding(
-                            padding: const EdgeInsets.only(left: 30.0),
-                            child: Image.network(
-                              widget.image!,
-                              width: 40.0,
-                              height: 40.0,
+                            child: Center(
+                              child: Text(
+                                snapshot.data.text,
+                                style: const TextStyle(
+                                  fontSize: 4,
+                                  color: Colors.black,
+                                ),
+                              ),
                             ),
-                          ),
+                          );
+                        } else {
+                          return Container(
+                            width: 40.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.0),
+                              color: const Color(0xFFFFF3FF),
+                            ),
+                            child: Center(
+                              child: Text(
+                                snapshot.error.toString(),
+                                style: TextStyle(
+                                  fontSize: 4,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
                   )
                 ],
               ),
@@ -71,7 +103,7 @@ class _MainScreenState extends State<MainScreen> {
             padding: const EdgeInsets.only(top: 20.0),
             child: Container(
               height: 400,
-              width: MediaQuery.of(context).size.width - 90,
+              width: MediaQuery.of(context).size.width - 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
                 color: const Color(0xFFF2F2F2),
@@ -85,12 +117,58 @@ class _MainScreenState extends State<MainScreen> {
                       // отступ на последнем = 0
                       padding: EdgeInsets.only(bottom: index < 10 ? 5.0 : 0.0),
                       child: MeetItem(
-                          model: MeetItemModel(3, 5, "Встреча", "5 ноября",
-                              "18:00", [CircleModel(null, "⋯", 0xFFFFF3FF), CircleModel(null, "⋯", 0xFFFFF3FF),CircleModel(null, "⋯", 0xFFFFF3FF),CircleModel(null, "⋯", 0xFFFFF3FF),CircleModel(null, "⋯", 0xFFFFF3FF),CircleModel(null, "⋯", 0xFFFFF3FF),CircleModel(null, "⋯", 0xFFFFF3FF),CircleModel(null, "⋯", 0xFFFFF3FF),CircleModel(null, "⋯", 0xFFFFF3FF),])),
+                          model: MeetItemModel(
+                              3, 5, "Встреча", "5 ноября", "18:00", [
+                        CircleModel(null, "⋯", 0xFFFFF3FF),
+                        CircleModel(null, "⋯", 0xFFFFF3FF),
+                        CircleModel(null, "⋯", 0xFFFFF3FF),
+                        CircleModel(null, "⋯", 0xFFFFF3FF),
+                        CircleModel(null, "⋯", 0xFFFFF3FF),
+                        CircleModel(null, "⋯", 0xFFFFF3FF),
+                      ])),
                     );
                   },
                 ),
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 20.0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width - 40,
+              child: Row(children: [
+                InkWell(
+                  child: Container(
+                      height: 50,
+                      width: (MediaQuery.of(context).size.width - 60) / 2,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: const Color(0xFF1D3557)),
+                      child: const Center(
+                        child: Text(
+                          "HiBye",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: InkWell(
+                    child: Container(
+                        height: 50,
+                        width: (MediaQuery.of(context).size.width - 60) / 2,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: const Color(0xFF1D3557)),
+                        child: const Center(
+                          child: Text(
+                            "Создать",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )),
+                  ),
+                ),
+              ]),
             ),
           ),
           const Spacer(),
